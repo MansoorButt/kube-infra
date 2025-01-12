@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fl-server-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: fl-server
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          job-name: fl-client-job
+    ports:
+    - protocol: TCP
+      port: 58000

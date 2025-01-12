@@ -13,8 +13,7 @@ spec:
         effect: "NoSchedule"
       containers:
       - name: fl-client
-        image: fl-client:latest
-        imagePullPolicy: Never
+        image: mansoor001/cli:v2
         volumeMounts:
         - name: client-logs
           mountPath: /app/logs
