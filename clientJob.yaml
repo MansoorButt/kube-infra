@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fl-client-job
+spec:
+  completions: 2
+  parallelism: 2
+  template:
+    spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - name: fl-client
+        image: fl-client:latest
+        imagePullPolicy: Never
+        volumeMounts:
+        - name: client-logs
+          mountPath: /app/logs
+        command: ["/bin/sh", "-c"]
+        args:
+        - >
+          python client.py > /app/logs/client-$(hostname).log 2>&1
+      volumes:
+      - name: client-logs
+        persistentVolumeClaim:
+          claimName: client-logs-pvc
+      restartPolicy: Never
+  backoffLimit: 4

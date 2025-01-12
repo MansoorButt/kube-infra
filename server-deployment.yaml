@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fl-server
+  labels:
+    app: fl-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fl-server
+  template:
+    metadata:
+      labels:
+        app: fl-server
+    spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - name: fl-server
+        image: fl-server:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 58000
+        volumeMounts:
+        - name: server-logs
+          mountPath: /app/logs
+        command: ["/bin/sh", "-c"]
+        args:
+        - python server.py > /app/logs/server.log 2>&1
+        livenessProbe:
+          tcpSocket:
+            port: 58000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 58000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: server-logs
+        persistentVolumeClaim:
+          claimName: server-logs-pvc
